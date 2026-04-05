@@ -1,57 +1,44 @@
-// hooks/usePokemon.ts
 import { fetcher } from '@/lib/api';
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQuery,
-} from '@tanstack/react-query';
-import {
-  PokemonListItem,
-  PokemonResponse,
-  RawPokeApiResponse,
-} from '../types/pokemon';
+import { useQuery } from '@tanstack/react-query';
+import { PokemonDetail, RawPokemonDetail } from '../types/pokemon';
 
-const fetchPokemon = async (
-  page: number,
-  limit: number
-): Promise<PokemonResponse> => {
-  const offset = (page - 1) * limit;
-
-  const result = await fetcher<RawPokeApiResponse>('/pokemon', {
-    params: { limit, offset },
-  });
-
-  const data: PokemonListItem[] = result.results.map((p) => {
-    // Extract ID from url (e.g., "https://pokeapi.co/api/v2/pokemon/1/") to use for the image as they don't come in the API response
-    const id = p.url.split('/').filter(Boolean).pop() || '';
-    return {
-      ...p,
-      id,
-      imageUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
-    };
-  });
-
-  return { data, totalCount: result.count };
+const STAT_LABELS: Record<string, string> = {
+  hp: 'HP',
+  attack: 'Attack',
+  defense: 'Defense',
+  'special-attack': 'Sp. Attack',
+  'special-defense': 'Sp. Defense',
+  speed: 'Speed',
 };
 
-export function usePokemon(page: number, limit: number = 20) {
+export const fetchPokemonDetail = async (id: string): Promise<PokemonDetail> => {
+  const raw = await fetcher<RawPokemonDetail>(`/pokemon/${id}`);
+
+  return {
+    id: raw.id,
+    name: raw.name,
+    height: raw.height,
+    weight: raw.weight,
+    baseExperience: raw.base_experience,
+    imageUrl:
+      raw.sprites.other['official-artwork'].front_default ??
+      `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${raw.id}.png`,
+    types: raw.types.map((t) => t.type.name),
+    stats: raw.stats.map((s) => ({
+      name: STAT_LABELS[s.stat.name] ?? s.stat.name,
+      value: s.base_stat,
+    })),
+    abilities: raw.abilities.map((a) => ({
+      name: a.ability.name,
+      isHidden: a.is_hidden,
+    })),
+  };
+};
+
+export function usePokemonDetail(id: string) {
   return useQuery({
-    queryKey: ['pokemon', page, limit],
-    queryFn: () => fetchPokemon(page, limit),
-    placeholderData: keepPreviousData,
-  });
-}
-
-export function useInfinitePokemon(limit: number = 20) {
-  return useInfiniteQuery({
-    queryKey: ['pokemon', 'infinite', limit],
-    initialPageParam: 1,
-    queryFn: ({ pageParam }) => fetchPokemon(pageParam, limit),
-    getNextPageParam: (lastPage, allPages) => {
-      const maxPages = Math.ceil(lastPage.totalCount / limit);
-      const nextPage = allPages.length + 1;
-
-      return nextPage <= maxPages ? nextPage : undefined;
-    },
+    queryKey: ['pokemon', 'detail', id],
+    queryFn: () => fetchPokemonDetail(id),
+    enabled: !!id,
   });
 }
