@@ -6,8 +6,6 @@ import {
 } from '@tanstack/react-query';
 import { HomeClient } from './_components/HomeClient';
 
-export const revalidate = 86400; // Cache for 24 hours (ISR / SSG)
-
 export default async function Home() {
   const queryClient = new QueryClient();
 

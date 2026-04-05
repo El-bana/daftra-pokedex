@@ -13,17 +13,6 @@ export const metadata: Metadata = {
     'View detailed information about this Pokémon including stats, types, abilities, and more.',
 };
 
-export const revalidate = 86400;
-
-export async function generateStaticParams() {
-  const { fetchPokemon } = await import('@/features/pokemon/api/get-pokemons');
-  const response = await fetchPokemon(1, 20);
-
-  return response.data.map((pokemon) => ({
-    id: pokemon.id,
-  }));
-}
-
 export default async function PokemonDetailPage({
   params,
 }: {
