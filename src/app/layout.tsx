@@ -3,8 +3,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Pokedex',
-  description: 'A simple pokedex using Next.js and TanStack Query',
+  title: 'Pokédex — Discover and Explore Pokémon',
+  description:
+    'Browse the full Pokédex with pagination or infinite scroll. Powered by PokéAPI and built with Next.js.',
 };
 
 export default function RootLayout({
@@ -13,10 +14,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="antialiased">
       <body className="flex min-h-full flex-col">
         <QueryProvider>
-          <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             {children}
           </main>
         </QueryProvider>

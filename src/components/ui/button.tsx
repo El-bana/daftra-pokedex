@@ -36,7 +36,7 @@ export function Button({
       {isLoading ? (
         <Loader2
           className={cn(
-            'h-4 w-4 animate-spin',
+            'size-4 animate-spin',
             isActive ? 'text-white' : 'text-gray-500'
           )}
         />
